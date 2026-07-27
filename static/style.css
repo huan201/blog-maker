@@ -1,0 +1,235 @@
+/* ==========================================
+   博客样式 — Apple Design Language
+   ========================================== */
+
+/* --- 基础 --- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                 "PingFang SC", "Helvetica Neue", sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #1d1d1f;
+    background: #f5f5f7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* --- 导航栏：毛玻璃效果 --- */
+.nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 max(1rem, calc((100% - 720px) / 2));
+    height: 48px;
+    background: rgba(245, 245, 247, 0.72);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.nav-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    letter-spacing: -0.02em;
+}
+
+.nav-links { display: flex; gap: 1.5rem; }
+.nav-links a {
+    font-size: 0.9rem;
+    color: #6e6e73;
+    font-weight: 400;
+}
+.nav-links a:hover { color: #1d1d1f; }
+
+/* --- 主内容 --- */
+.main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem 4rem;
+}
+
+/* --- 排版 --- */
+h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    margin-bottom: 0.6rem;
+    color: #1d1d1f;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2.5rem 0 0.8rem;
+    color: #1d1d1f;
+}
+
+h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 1.8rem 0 0.5rem;
+}
+
+p { margin: 0.8rem 0; }
+
+/* --- 链接 --- */
+a {
+    color: #0071e3;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+a:hover { color: #0077ed; }
+
+/* --- 文章元信息 --- */
+.meta {
+    color: #86868b;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+}
+
+.subtitle {
+    color: #86868b;
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+/* --- 文章列表卡片（仅限 .post-list） --- */
+.post-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.post-list li {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition: all 0.25s ease;
+}
+
+.post-list li:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+.post-list li a {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #1d1d1f;
+    display: block;
+}
+.post-list li a:hover { color: #0071e3; }
+
+/* --- 正文内列表（Markdown 生成）--- */
+.main-content ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+    margin: 0.8rem 0;
+}
+.main-content li {
+    padding: 0;
+    margin: 0.2rem 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+}
+.main-content li:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* --- 引用块 --- */
+blockquote {
+    background: #fbfbfd;
+    border-left: 3px solid #0071e3;
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    color: #515154;
+    font-style: italic;
+}
+
+/* --- 行内代码 --- */
+code {
+    background: #f5f5f7;
+    color: #e0447d;
+    padding: 0.15em 0.4em;
+    border-radius: 5px;
+    font-size: 0.88em;
+    font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* --- 标签云 --- */
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5em 1em;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: #1d1d1f;
+    transition: all 0.25s ease;
+}
+.tag:hover {
+    background: #0071e3;
+    color: #fff;
+    border-color: #0071e3;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.25);
+}
+
+.tag .count {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+/* --- 搜索 --- */
+#search-input {
+    width: 100%;
+    padding: 0.85em 1.2em;
+    font-size: 1rem;
+    font-family: inherit;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 14px;
+    margin: 0.5rem 0 1.5rem;
+    outline: none;
+    transition: all 0.25s ease;
+    color: #1d1d1f;
+}
+#search-input::placeholder { color: #aeaeb2; }
+#search-input:focus {
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.12);
+}
+
+#results { min-height: 100px; }
+
+/* --- 响应式 --- */
+@media (max-width: 640px) {
+    .main { padding: 2rem 1rem 3rem; }
+    h1 { font-size: 1.8rem; }
+    li { padding: 0.85rem 1rem; }
+    .nav-links { gap: 1rem; }
+}
