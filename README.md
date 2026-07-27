@@ -45,8 +45,6 @@ blog/
 │   └── search.html        # 搜索页
 ├── static/                # 静态资源 (CSS)
 ├── dist/                  # 构建输出
-├── build.py               # 向后兼容入口
-├── serve.py               # 向后兼容入口
 └── README.md
 ```
 
