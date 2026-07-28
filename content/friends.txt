@@ -1,0 +1,4 @@
+---
+title: 友链
+---
+- [测试案例](https://example.com) - 测试用例

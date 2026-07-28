@@ -1,5 +1,13 @@
 <h1>{{ title }}</h1>
-<p class="meta">日期: {{ date }} | 标签: {{ tags }} | 字数: {{ word_count }}</p>
+<p class="meta">日期: {{ date }} | 标签: {{ tags }} | 字数: {{ word_count }} | <span id="read-count">加载中...</span></p>
 <div class="main-content">
 {{ body }}
 </div>
+<script>
+(function(){
+  var key = 'blog-read-' + location.pathname;
+  var count = (parseInt(localStorage.getItem(key)) || 0) + 1;
+  localStorage.setItem(key, count);
+  document.getElementById('read-count').textContent = '阅读 ' + count + ' 次';
+})();
+</script>

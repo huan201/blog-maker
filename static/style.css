@@ -171,6 +171,67 @@ code {
     font-family: "SF Mono", "Fira Code", "Consolas", monospace;
 }
 
+/* --- 代码块（代码框）--- */
+pre {
+    background: #1d1d1f;
+    color: #f5f5f7;
+    padding: 1.25rem 1.5rem;
+    border-radius: 14px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    line-height: 1.6;
+    font-size: 0.9rem;
+}
+pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+    font-size: inherit;
+    word-wrap: break-word;
+}
+/* 高亮成功时让 hljs 完全控制颜色 */
+pre code.hljs {
+    background: inherit;
+    color: inherit;
+    padding: inherit;
+}
+
+/* --- 图片 --- */
+.main img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+    margin: 1.5rem auto;
+}
+
+/* --- 附件下载链接 --- */
+/* 匹配 href 中包含 static/attachments/ 的链接，通过 JS 动态加样式 */
+a[href*="static/attachments/"],
+a[href*="../static/attachments/"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.5em 1em;
+    background: #f5f5f7;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+a[href*="static/attachments/"]:hover,
+a[href*="../static/attachments/"]:hover {
+    background: #0071e3;
+    color: #fff;
+    border-color: #0071e3;
+}
+a[href*="static/attachments/"]::before,
+a[href*="../static/attachments/"]::before {
+    content: "📎";
+    font-size: 0.9em;
+}
+
 /* --- 标签云 --- */
 .tags {
     display: flex;
@@ -204,7 +265,46 @@ code {
     opacity: 0.6;
 }
 
-/* --- 搜索 --- */
+/* --- 友链卡片 --- */
+.friends-list ul {
+    list-style: none;
+    padding: 0;
+}
+.friends-list li {
+    padding: 1rem 1.25rem;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
+    margin-bottom: 0.6rem;
+    transition: all 0.2s ease;
+}
+.friends-list li:hover {
+    border-color: #0071e3;
+    background: #fbfbfd;
+}
+.friends-list a {
+    font-weight: 500;
+}
+
+/* --- 导航 GitHub 链接 --- */
+.nav-github {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: #1d1d1f;
+    color: #f5f5f7 !important;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 0;
+    transition: all 0.25s ease;
+}
+.nav-github:hover {
+    transform: scale(1.1);
+    background: #555;
+}
 #search-input {
     width: 100%;
     padding: 0.85em 1.2em;
@@ -225,6 +325,16 @@ code {
 }
 
 #results { min-height: 100px; }
+
+/* --- 数学公式 --- */
+/* MathJax 渲染的块级公式居中 + 留白 */
+mjx-container[display="true"] {
+    display: block;
+    text-align: center;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
 
 /* --- 响应式 --- */
 @media (max-width: 640px) {

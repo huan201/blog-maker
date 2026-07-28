@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编辑器 — Blog</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+    display: flex; flex-direction: column;
+    background: #f5f5f7;
+}
+.toolbar {
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    background: rgba(245,245,247,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+.toolbar-title { font-weight: 600; color: #1d1d1f; white-space: nowrap; }
+.toolbar-left { display: flex; align-items: center; gap: 0.5rem; }
+.toolbar-actions { display: flex; gap: 0.35rem; }
+.toolbar-actions a, .toolbar-actions button, .toolbar-actions select {
+    font-size: 0.8rem;
+    padding: 0.35em 0.7em;
+    border-radius: 6px;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: #fff;
+    color: #1d1d1f;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.toolbar-actions button:hover, .toolbar-actions select:hover {
+    background: #0071e3; color: #fff; border-color: #0071e3;
+}
+.toolbar-actions select { max-width: 180px; text-overflow: ellipsis; }
+.toolbar-actions select:hover { background: #fff; color: #1d1d1f; }
+.toolbar-actions a { text-decoration: none; }
+.toolbar-actions a:hover { background: #f0f0f0; }
+.btn-primary { background: #0071e3 !important; color: #fff !important; border-color: #0071e3 !important; }
+.btn-primary:hover { background: #0060c0 !important; }
+#save-status { font-size: 0.75rem; color: #86868b; white-space: nowrap; }
+
+.editor-wrap { display: flex; flex: 1; min-height: 0; }
+.pane { flex: 1; overflow-y: auto; padding: 1.5rem 2rem; }
+.pane-left { border-right: 1px solid rgba(0,0,0,0.06); }
+#source {
+    width: 100%; height: 100%;
+    border: none; outline: none; resize: none;
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 14px; line-height: 1.7;
+    color: #1d1d1f; background: transparent;
+}
+#source::placeholder { color: #aeaeb2; }
+
+.preview h1 { font-size: 1.8rem; font-weight: 700; margin: 0 0 0.3rem; }
+.preview h2 { font-size: 1.3rem; margin: 1.5rem 0 0.5rem; }
+.preview p { margin: 0.5rem 0; line-height: 1.7; }
+.preview code {
+    background: #f0f0f5; padding: 0.15em 0.4em;
+    border-radius: 4px; font-family: "SF Mono", Consolas, monospace;
+    font-size: 0.9em; color: #e0447d;
+}
+.preview pre { background: #f5f5f7; padding: 1rem; border-radius: 10px; overflow-x: auto; margin: 1rem 0; }
+.preview pre code { background: none; padding: 0; color: #1d1d1f; }
+.preview blockquote {
+    border-left: 3px solid #0071e3; border-radius: 0 8px 8px 0;
+    background: #fbfbfd; padding: 0.8rem 1rem; margin: 1rem 0; color: #515154;
+}
+.preview table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+.preview th, .preview td { border: 1px solid #ddd; padding: 0.5em 0.8em; text-align: left; }
+.preview th { background: #f5f5f7; font-weight: 600; }
+
+.toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: #1d1d1f; color: #fff;
+    padding: 0.6em 1.5em; border-radius: 10px;
+    font-size: 0.9rem; opacity: 0; transition: opacity 0.3s;
+    pointer-events: none; z-index: 999;
+}
+.toast.show { opacity: 1; }
+
+mjx-container[display="true"] { display: block; text-align: center; margin: 1rem 0; }
+
+/* ==== 弹窗样式 ==== */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35); display: flex;
+    align-items: center; justify-content: center; z-index: 1000;
+}
+.modal-box {
+    background: #fff; border-radius: 16px; padding: 1.5rem 2rem;
+    width: 90%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.modal-box h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #1d1d1f; }
+.modal-box label { display: block; font-size: 0.85rem; color: #86868b; margin: 0.6rem 0 0.3rem; }
+.modal-box input[type="text"] {
+    width: 100%; padding: 0.5em 0.7em; border: 1px solid #d2d2d7;
+    border-radius: 8px; font-size: 0.9rem; box-sizing: border-box;
+}
+.modal-row { display: flex; gap: 0.5rem; }
+.modal-row input { flex: 1; }
+.modal-row button {
+    padding: 0.5em 1em; border-radius: 8px;
+    border: 1px solid #d2d2d7; background: #f5f5f7; cursor: pointer;
+    font-size: 0.85rem; white-space: nowrap;
+}
+.modal-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.2rem; }
+.modal-actions button {
+    padding: 0.45em 1.2em; border-radius: 8px; border: 1px solid #d2d2d7;
+    background: #f5f5f7; cursor: pointer; font-size: 0.9rem;
+}
+.modal-actions .btn-primary { background: #0071e3; color: #fff; border-color: #0071e3; }
+
+@media (max-width: 768px) {
+    .editor-wrap { flex-direction: column; }
+    .pane-left { border-right: none; border-bottom: 1px solid rgba(0,0,0,0.06); height: 50%; }
+    .toolbar-actions select { max-width: 100px; }
+}
+</style>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+</head>
+<body>
+
+<div class="toolbar">
+    <div class="toolbar-left">
+        <span class="toolbar-title">📝 编辑器</span>
+        <span id="save-status"></span>
+    </div>
+    <div class="toolbar-actions">
+        <a href="index.html">首页</a>
+        <select id="file-select" onchange="loadSelected()">
+            <option value="">— 选择文章 —</option>
+        </select>
+        <button onclick="insertTable()" title="插入 Markdown 表格">+ 表格</button>
+        <button onclick="showInsertImage()" title="插入图片">🖼 图片</button>
+        <button onclick="showInsertFile()" title="插入附件">📎 附件</button>
+        <button onclick="insertCode()" title="插入代码块">&lt;&gt; 代码</button>
+        <button class="btn-primary" id="btn-save" onclick="saveToServer()" disabled>保存</button>
+        <button onclick="downloadTxt()">下载</button>
+        <button onclick="copyContent()">复制</button>
+    </div>
+</div>
+
+<div class="editor-wrap">
+    <div class="pane pane-left">
+        <textarea id="source" placeholder="在此编写文章...&#10;&#10;---&#10;title: 文章标题&#10;date: 2026-07-27&#10;tags: 标签1, 标签2&#10;---&#10;&#10;## 正文"></textarea>
+    </div>
+    <div class="pane preview" id="preview"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- 隐藏的文件上传 input -->
+<input type="file" id="image-upload" accept="image/*" style="display:none" onchange="uploadFile('image')">
+<input type="file" id="attachment-upload" style="display:none" onchange="uploadFile('attachment')">
+
+<!-- 插入图片弹窗 -->
+<div class="modal-overlay" id="modal-image" style="display:none" onclick="if(event.target===this) closeModal('image')">
+    <div class="modal-box">
+        <h3>插入图片</h3>
+        <label>图片描述（alt 文字）：</label>
+        <input type="text" id="img-alt" placeholder="图片描述...">
+        <label>图片路径：</label>
+        <div class="modal-row">
+            <input type="text" id="img-path" placeholder="static/images/photo.jpg">
+            <button onclick="document.getElementById('image-upload').click()">上传</button>
+        </div>
+        <div class="modal-actions">
+            <button onclick="closeModal('image')">取消</button>
+            <button class="btn-primary" onclick="insertImage()">插入</button>
+        </div>
+    </div>
+</div>
+
+<!-- 插入附件弹窗 -->
+<div class="modal-overlay" id="modal-attach" style="display:none" onclick="if(event.target===this) closeModal('attach')">
+    <div class="modal-box">
+        <h3>插入附件</h3>
+        <label>显示文字：</label>
+        <input type="text" id="attach-label" placeholder="下载文件名">
+        <label>附件路径：</label>
+        <div class="modal-row">
+            <input type="text" id="attach-path" placeholder="static/attachments/file.pdf">
+            <button onclick="document.getElementById('attachment-upload').click()">上传</button>
+        </div>
+        <div class="modal-actions">
+            <button onclick="closeModal('attach')">取消</button>
+            <button class="btn-primary" onclick="insertAttachment()">插入</button>
+        </div>
+    </div>
+</div>
+
+<script src="../static/marked.min.js"></script>
+<script>
+MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] } };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<script>
+var source = document.getElementById('source');
+var preview = document.getElementById('preview');
+var toast = document.getElementById('toast');
+var fileSelect = document.getElementById('file-select');
+var btnSave = document.getElementById('btn-save');
+var statusEl = document.getElementById('save-status');
+
+var serverMode = false;     // 是否在 server 模式下
+var currentFile = '';       // 当前编辑的文件名
+
+// ==== 初始化：检测 server 模式，加载文章列表 ====
+(function init() {
+    fetch('/api/posts')
+        .then(function(r) {
+            if (!r.ok) throw new Error('no server');
+            return r.json();
+        })
+        .then(function(posts) {
+            serverMode = true;
+            btnSave.disabled = false;
+            statusEl.textContent = '(已连接服务器)';
+            // 填充下拉列表
+            posts.forEach(function(p) {
+                var opt = document.createElement('option');
+                opt.value = p.filename;
+                opt.textContent = p.title + ' (' + p.date + ')';
+                fileSelect.appendChild(opt);
+            });
+        })
+        .catch(function() {
+            serverMode = false;
+            statusEl.textContent = '(离线模式)';
+            // 离线模式：恢复本地草稿
+            var saved = localStorage.getItem('blog-draft');
+            if (saved) source.value = saved;
+        });
+    renderPreview();
+})();
+
+// ==== 加载选中文章 ====
+function loadSelected() {
+    var filename = fileSelect.value;
+    if (!filename) return;
+    fetch('/api/posts/' + filename)
+        .then(function(r) { return r.text(); })
+        .then(function(text) {
+            source.value = text;
+            currentFile = filename;
+            statusEl.textContent = '当前: ' + filename;
+            localStorage.removeItem('blog-draft'); // 清离线草稿
+            renderPreview();
+            showToast('已加载: ' + filename);
+        });
+}
+
+// ==== 保存到服务器 ====
+function saveToServer() {
+    if (!serverMode) { showToast('离线模式，请用"下载"保存'); return; }
+
+    var filename = currentFile;
+    if (!filename) {
+        // 新建文章：从 frontmatter 提取文件名
+        var m = source.value.match(/^title:[ \t]*(.+)/m);
+        var title = m ? m[1].trim() : 'untitled';
+        filename = title.replace(/[\\\/:*?"<>|]/g, '_') + '.txt';
+    }
+    // 确认覆盖
+    if (currentFile && !confirm('确定覆盖 "' + currentFile + '" ？')) return;
+
+    fetch('/api/posts/' + filename, {
+        method: 'POST',
+        body: source.value
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            currentFile = filename;
+            statusEl.textContent = '已保存: ' + filename;
+            showToast('已保存: ' + filename);
+            // 刷新下拉列表
+            location.reload();
+        }
+    })
+    .catch(function() { showToast('保存失败'); });
+}
+
+// ==== 插入表格模板 ====
+function insertTable() {
+    var pos = source.selectionStart;
+    var tpl = '| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n';
+    source.value = source.value.slice(0, pos) + tpl + source.value.slice(pos);
+    source.focus();
+    renderPreview();
+    showToast('已插入表格模板');
+}
+
+// ==== 插入图片弹窗 ====
+function showInsertImage() {
+    document.getElementById('modal-image').style.display = 'flex';
+    document.getElementById('img-path').focus();
+}
+function insertImage() {
+    var alt = document.getElementById('img-alt').value || '图片';
+    var path = document.getElementById('img-path').value;
+    if (!path) { showToast('请输入图片路径'); return; }
+    var pos = source.selectionStart;
+    var md = '![' + alt + '](' + path + ')';
+    source.value = source.value.slice(0, pos) + md + source.value.slice(pos);
+    closeModal('image');
+    renderPreview();
+    showToast('已插入图片');
+}
+
+// ==== 插入附件弹窗 ====
+function showInsertFile() {
+    document.getElementById('modal-attach').style.display = 'flex';
+    document.getElementById('attach-path').focus();
+}
+function insertAttachment() {
+    var label = document.getElementById('attach-label').value || '附件';
+    var path = document.getElementById('attach-path').value;
+    if (!path) { showToast('请输入附件路径'); return; }
+    var pos = source.selectionStart;
+    var md = '[' + label + '](' + path + ')';
+    source.value = source.value.slice(0, pos) + md + source.value.slice(pos);
+    closeModal('attach');
+    renderPreview();
+    showToast('已插入附件');
+}
+
+// ==== 插入代码块 ====
+function insertCode() {
+    var lang = prompt('请输入语言（如 python, javascript，留空则不指定）：', '');
+    var pos = source.selectionStart;
+    var md = '```' + (lang || '') + '\n\n\```';
+    source.value = source.value.slice(0, pos) + md + source.value.slice(pos);
+    // 将光标放在代码块中间
+    source.focus();
+    source.selectionStart = source.selectionEnd = pos + 3 + (lang ? lang.length : 0) + 1;
+    renderPreview();
+    showToast('已插入代码块');
+}
+
+// ==== 关闭弹窗 ====
+function closeModal(type) {
+    document.getElementById('modal-' + type).style.display = 'none';
+    // 清空输入
+    if (type === 'image') {
+        document.getElementById('img-alt').value = '';
+        document.getElementById('img-path').value = '';
+    } else {
+        document.getElementById('attach-label').value = '';
+        document.getElementById('attach-path').value = '';
+    }
+}
+
+// ==== 上传文件到服务器 ====
+function uploadFile(type) {
+    var fileInput = document.getElementById(type + '-upload');
+    var file = fileInput.files[0];
+    if (!file) return;
+
+    if (!serverMode) {
+        showToast('离线模式，无法上传。请手动输入路径。');
+        fileInput.value = '';
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/upload?type=' + type, {
+        method: 'POST',
+        body: formData
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.ok) {
+            // 自动填入路径
+            if (type === 'image') {
+                document.getElementById('img-path').value = data.path;
+                if (!document.getElementById('img-alt').value) {
+                    document.getElementById('img-alt').value = file.name;
+                }
+            } else {
+                document.getElementById('attach-path').value = data.path;
+                if (!document.getElementById('attach-label').value) {
+                    document.getElementById('attach-label').value = file.name;
+                }
+            }
+            showToast('已上传: ' + file.name);
+        }
+    })
+    .catch(function() { showToast('上传失败'); });
+
+    fileInput.value = ''; // 允许重复上传同一文件
+}
+
+// ==== 自动保存草稿（仅离线模式） ====
+source.addEventListener('input', function() {
+    if (!serverMode) localStorage.setItem('blog-draft', source.value);
+    renderPreview();
+});
+
+// ==== 渲染预览 ====
+var renderTimer;
+function renderPreview() {
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(function() {
+        var text = source.value;
+        // 0. 统一换行符：Windows 的 \r\n → \n，否则所有正则会失效
+        text = text.replace(/\r\n/g, '\n');
+        if (!text.trim()) { preview.innerHTML = '<p style="color:#aeaeb2">预览区域</p>'; return; }
+
+        // 1. 去掉 frontmatter
+        var body = text;
+        if (text.startsWith('---')) {
+            var parts = text.split('---', 3);
+            if (parts.length >= 3) body = parts.slice(2).join('---');
+        }
+
+        // 2. LaTeX 定界符 → $ / $$（必须在保护之前）
+        //    JS replace 中 $$ 表示单个 $，所以用 $$$$ 得到 $$
+        body = body.replace(/\\\[/g, '$$$$').replace(/\\\]/g, '$$$$');
+        body = body.replace(/\\\(/g, '$').replace(/\\\)/g, '$');
+
+        // 3. 提取数学区域，用占位符替换，防止 Markdown 正则破坏
+        var mathBlocks = [];
+        // 先显示公式 $$...$$，后行内公式 $...$
+        body = body.replace(/\$\$([\s\S]*?)\$\$/g, function(m, content) {
+            mathBlocks.push(m);
+            return '%%MATH' + (mathBlocks.length - 1) + '%%';
+        });
+        body = body.replace(/\$(.+?)\$/g, function(m, content) {
+            mathBlocks.push(m);
+            return '%%MATH' + (mathBlocks.length - 1) + '%%';
+        });
+
+        // 4. Markdown → HTML（优先用 marked.js，失败则降级到纯文本）
+        var html;
+        try {
+            if (typeof marked !== 'undefined') {
+                html = marked.parse(body, { gfm: true, breaks: false });
+            } else {
+                html = '<pre>' + escapeHtml(body) + '</pre>';
+            }
+        } catch (e) {
+            html = '<pre>' + escapeHtml(body) + '</pre>';
+            console.error('Markdown 渲染失败:', e);
+        }
+
+        // 5. 还原数学区域
+        html = html.replace(/%%MATH(\d+)%%/g, function(m, idx) {
+            return mathBlocks[parseInt(idx)] || '';
+        });
+
+        // 保存预览区滚动位置，防止 innerHTML 重置导致跳动
+        var scrollTop = preview.scrollTop;
+
+        preview.innerHTML = html;
+
+        // 恢复滚动位置
+        preview.scrollTop = scrollTop;
+
+        // 6. 代码高亮（仅作用于预览区）
+        try {
+            if (typeof hljs !== 'undefined') {
+                preview.querySelectorAll('pre code').forEach(function(b) {
+                    hljs.highlightElement(b);
+                });
+            }
+        } catch(e) {}
+
+        // 7. MathJax 渲染（带重试，因为 script 是 async 加载的）
+        typesetMath();
+    }, 150);
+}
+
+function typesetMath(retries) {
+    retries = retries || 0;
+    if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise([preview]).catch(function() {});
+    } else if (retries < 30) {
+        // MathJax CDN 尚未加载完成，200ms 后重试
+        setTimeout(function() { typesetMath(retries + 1); }, 200);
+    }
+}
+
+// ==== 简易 Markdown → HTML ====
+function renderMd(text) {
+    var html = text;
+    html = html.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+    html = html.replace(/^#### (.+)$/gm, '<h4>$1</h4>');
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+    html = html.replace(/^---$/gm, '<hr>');
+    html = renderTables(html);
+    html = html.replace(/^(\s*)[-*] (.+)$/gm, '$1<li>$2</li>');
+    html = html.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>');
+    html = html.replace(/^(?!<[a-z]|$)(.+)$/gm, '<p>$1</p>');
+    html = html.replace(/<p>\s*<\/p>/g, '');
+    html = html.replace(/<\/ul>\s*<ul>/g, '');
+    return html;
+}
+
+function renderTables(text) {
+    // ^\s*\| 允许行首有空格
+    return text.replace(/^\s*\|(.+)\|\n\s*\|[-| :]+\|\n((?:\s*\|.+\|\n?)+)/gm, function(m, header, rows) {
+        var hcols = header.split('|').map(function(c) { return c.trim(); }).filter(Boolean);
+        var thead = '<thead><tr>' + hcols.map(function(c) { return '<th>' + c + '</th>'; }).join('') + '</tr></thead>';
+        var tbody = '<tbody>' + rows.trim().split('\n').map(function(r) {
+            var cols = r.split('|').map(function(c) { return c.trim(); }).filter(Boolean);
+            return '<tr>' + cols.map(function(c) { return '<td>' + c + '</td>'; }).join('') + '</tr>';
+        }).join('') + '</tbody>';
+        return '<table>' + thead + tbody + '</table>';
+    });
+}
+
+// ==== 下载 .txt ====
+function downloadTxt() {
+    var filename = currentFile || 'article.txt';
+    var blob = new Blob([source.value], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    showToast('已下载: ' + filename);
+}
+
+// ==== 复制 ====
+function copyContent() {
+    navigator.clipboard.writeText(source.value).then(function() {
+        showToast('已复制到剪贴板');
+    });
+}
+
+// ==== Toast ====
+function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 1500);
+}
+
+function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+</script>
+</body>
+</html>

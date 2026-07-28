@@ -4,19 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
-    <link rel="stylesheet" href="static/style.css">
+    <link rel="stylesheet" href="{{ static_path }}style.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 </head>
 <body>
     <nav class="nav">
-        <a href="index.html" class="nav-title">Blog</a>
+        <a href="{{ root_path }}index.html" class="nav-title">Blog</a>
         <div class="nav-links">
-            <a href="index.html">首页</a>
-            <a href="tags.html">标签</a>
-            <a href="search.html">搜索</a>
+            <a href="{{ root_path }}index.html">首页</a>
+            <a href="{{ root_path }}tags/index.html">标签</a>
+            <a href="{{ root_path }}friends/index.html">友链</a>
+            <a href="{{ root_path }}search.html">搜索</a>
+            <a href="https://github.com/huan201/blog-maker" target="_blank" class="nav-github" title="GitHub">GH</a>
         </div>
     </nav>
     <main class="main">
 {{ content }}
     </main>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$']],
+        displayMath: [['$$', '$$']]
+      }
+    };
+    </script>
+    <script id="MathJax-script" async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
 </body>
 </html>
