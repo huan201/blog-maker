@@ -1,44 +1,16 @@
-<h1>搜索</h1>
-<input type="text" id="search-input" placeholder="搜索文章标题或标签..." autofocus>
-<div id="results">
-    <p class="subtitle">输入关键词开始搜索。</p>
+<section class="page-head">
+  <h1 class="page-head__title">搜索</h1>
+  <p class="page-head__lead">搜索标题、正文和标签，按 Esc 清空。</p>
+</section>
+
+<div class="search">
+  <div class="search__field">
+    <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+    <input id="search-input" class="search__input" type="search" autocomplete="off"
+           placeholder="输入关键词…" aria-label="搜索文章" data-index="{{ index_url }}">
+    <kbd class="search__kbd">/</kbd>
+  </div>
+  <p class="search__status" id="search-status" aria-live="polite"></p>
+  <div class="search__results" id="search-results"></div>
+  <noscript><p class="empty">搜索需要启用 JavaScript。</p></noscript>
 </div>
-
-<script>
-(function() {
-    var input = document.getElementById('search-input');
-    var results = document.getElementById('results');
-    var posts = [];
-
-    fetch('posts.json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) { posts = data; })
-        .catch(function() { results.innerHTML = '<p>无法加载搜索索引。</p>'; });
-
-    input.addEventListener('input', function() {
-        var query = input.value.trim().toLowerCase();
-        if (!query) {
-            results.innerHTML = '<p class="subtitle">输入关键词开始搜索。</p>';
-            return;
-        }
-
-        var matched = posts.filter(function(p) {
-            return p.title.toLowerCase().indexOf(query) !== -1
-                || p.tags.toLowerCase().indexOf(query) !== -1;
-        });
-
-        if (matched.length === 0) {
-            results.innerHTML = '<p class="subtitle">未找到匹配的文章。</p>';
-            return;
-        }
-
-        var html = '<p class="subtitle">' + matched.length + ' 篇匹配</p><ul class="post-list">';
-        matched.forEach(function(p) {
-            html += '<li><a href="' + p.html_file + '">' + p.title + '</a>'
-                 + '<small style="color:#86868b"> ' + p.date + ' · ' + p.word_count + '字</small></li>';
-        });
-        html += '</ul>';
-        results.innerHTML = html;
-    });
-})();
-</script>

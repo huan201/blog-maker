@@ -1,0 +1,56 @@
+{
+  "site": {
+    "title": "我的博客",
+    "subtitle": "记录学习与思考",
+    "description": "一个用纯 Python 手写的静态博客，记录神经网络、机器学习与编程学习的过程。",
+    "author": "huan201",
+    "language": "zh-CN",
+    "url": "https://huan201.github.io/",
+    "base_path": "/",
+    "github": "https://github.com/huan201/blog-maker",
+    "email": "",
+    "footer": ""
+  },
+  "build": {
+    "content_dir": "content",
+    "templates_dir": "templates",
+    "static_dir": "static",
+    "output_dir": "dist",
+    "include_drafts": false
+  },
+  "markdown": {
+    "allow_html": true,
+    "footnotes": true,
+    "tables": true,
+    "task_lists": true,
+    "strikethrough": true,
+    "autolink": true,
+    "math": true
+  },
+  "comments": {
+    "enabled": true,
+    "provider": "utterances",
+    "repo": "huan201/blog-maker",
+    "repo_id": "",
+    "category": "Announcements",
+    "category_id": "",
+    "mapping": "pathname",
+    "issue_term": "pathname",
+    "label": "comment",
+    "reactions_enabled": true,
+    "input_position": "top",
+    "lazy": true
+  },
+  "metrics": {
+    "enabled": true,
+    "provider": "local",
+    "namespace": "huan201-blog",
+    "site_code": "",
+    "endpoint": "",
+    "seed_file": "content/views.json"
+  },
+  "theme": {
+    "accent": "#0071e3",
+    "appearance": "auto"
+  }
+}

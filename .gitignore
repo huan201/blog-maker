@@ -1,7 +1,8 @@
 # 虚拟环境
 venv/
+.venv/
 
-# 构建输出
+# 构建输出（由 GitHub Actions 在部署时现构建，不进仓库）
 dist/
 public/
 
@@ -9,3 +10,21 @@ public/
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
+.pytest_cache/
+
+# 私有草稿：不会被构建，也不会被提交
+content/_drafts/
+content/*.draft.txt
+
+# 编辑器 / 系统垃圾
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 临时文件
+*.tmp
+*.bak
+.blog-check/

@@ -1,5 +1,8 @@
-<h1>标签: {{ tag }}</h1>
-<p class="subtitle">{{ count }} 篇文章</p>
-<ul class="post-list">
-{{ links }}
-</ul>
+<section class="page-head">
+  <p class="page-head__eyebrow">标签</p>
+  <h1 class="page-head__title">{{ tag }}</h1>
+  <p class="page-head__lead">{{ count }} 篇文章</p>
+</section>
+<section class="feed">
+  {{ posts }}
+</section>
